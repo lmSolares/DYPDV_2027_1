@@ -8,7 +8,7 @@ public class Jugador : MonoBehaviour
     {
         if (col.gameObject.CompareTag("Suelo"))
         {
-            enSuelo = true; //[cite: 2]
+            enSuelo = true;
         }
     }
 
