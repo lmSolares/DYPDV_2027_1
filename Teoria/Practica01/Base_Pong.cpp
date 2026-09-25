@@ -13,7 +13,7 @@ double ball_speed;
 /* paddle players */
 const double paddle_width = 3;
 const double paddle_height = 20;
-const double paddle_speed = 5.0;
+const double paddle_speed = 2.5;
 
 /* player left */
 const double pl_pos_x = 10;
@@ -22,6 +22,10 @@ double pl_pos_y = 60;
 /* player right */
 const double pr_pos_x = 150;
 double pr_pos_y = 60;
+
+/* keyboard */
+bool keyStates[256] = {false};
+bool specialKeyStates[256] = {false};
 
 GLfloat T1[16] = {1., 0., 0., 0., 0., 1., 0., 0.,
                   0., 0., 1., 0., 0., 0., 0., 1.};
@@ -51,6 +55,24 @@ void draw_paddles() {
           pr_pos_x + paddle_width, pr_pos_y + paddle_height);
 }
 
+void paddles_movement() {
+  // jugador izquierdo
+  if ((keyStates['w'] || keyStates['W']) && pl_pos_y + paddle_height < 120) {
+    pl_pos_y += paddle_speed;
+  }
+  if ((keyStates['s'] || keyStates['S']) && pl_pos_y - paddle_height > 0) {
+    pl_pos_y -= paddle_speed;
+  }
+
+  // jugador derecho
+  if (specialKeyStates[GLUT_KEY_UP] && pr_pos_y + paddle_height < 120) {
+    pr_pos_y += paddle_speed;
+  }
+  if (specialKeyStates[GLUT_KEY_DOWN] && pr_pos_y - paddle_height > 0) {
+    pr_pos_y -= paddle_speed;
+  }
+}
+
 GLfloat RadiusOfBall = 15.;
 // Draw the ball, centered at the origin
 void draw_ball() {
@@ -64,6 +86,7 @@ void Display(void) {
 
   glLoadIdentity();
 
+  paddles_movement();
   draw_paddles(); /* dibujamos las paletas */
 
   if (ypos == RadiusOfBall && ydir == -1) {
@@ -156,34 +179,14 @@ void init(void) {
 
 /* Detección de teclas */
 // Controles del jugador izquierdo (detecta w y s)
-void keyboard(unsigned char key, int x, int y) {
-  switch (key) {
-  case 'w':
-  case 'W':
-    if (pl_pos_y + paddle_height < 120)
-      pl_pos_y += paddle_speed;
-    break;
-  case 's':
-  case 'S':
-    if (pl_pos_y - paddle_height > 0)
-      pl_pos_y -= paddle_speed;
-    break;
-  }
-}
+void keyboardDown(unsigned char key, int x, int y) { keyStates[key] = true; }
 
-// Controles del jugador derecho (flechas)
-void specialKeys(int key, int x, int y) {
-  switch (key) {
-  case GLUT_KEY_UP:
-    if (pr_pos_y + paddle_height < 120)
-      pr_pos_y += paddle_speed;
-    break;
-  case GLUT_KEY_DOWN:
-    if (pr_pos_y - paddle_height > 0)
-      pr_pos_y -= paddle_speed;
-    break;
-  }
-}
+void keyboardUp(unsigned char key, int x, int y) { keyStates[key] = false; }
+
+// Controles del jugador derecho (detecta flechas)
+void specialDown(int key, int x, int y) { specialKeyStates[key] = true; }
+
+void specialUp(int key, int x, int y) { specialKeyStates[key] = false; }
 
 int main(int argc, char *argv[]) {
 
@@ -194,8 +197,12 @@ int main(int argc, char *argv[]) {
   init();
   glutDisplayFunc(Display);
   glutReshapeFunc(reshape);
-  glutKeyboardFunc(keyboard);
-  glutSpecialFunc(specialKeys);
+
+  glutKeyboardFunc(keyboardDown);
+  glutKeyboardUpFunc(keyboardUp);
+  glutSpecialFunc(specialDown);
+  glutSpecialUpFunc(specialUp);
+
   glutMainLoop();
 
   return 1;
