@@ -1,5 +1,3 @@
-// #include <windows.h> //the windows include file, required by all windows
-// applications
 #include <GL/glut.h> //the glut file for windows operations
 // it also includes gl.h and glu.h for the openGL library calls
 #include <math.h>
@@ -10,6 +8,18 @@ double xpos, ypos, ydir, xdir; // x and y position for house to be drawn
 double sx, sy, squash;         // xy scale factors
 double rot, rdir;              // rotation
 double ball_speed;
+
+/* paddle players */
+const double paddle_width = 3;
+const double paddle_height = 20;
+
+/* player left */
+const double pl_pos_x = 10;
+double pl_pos_y;
+
+/* player right */
+const double pr_pos_x = 150;
+double pr_pos_y;
 
 GLfloat T1[16] = {1., 0., 0., 0., 0., 1., 0., 0.,
                   0., 0., 1., 0., 0., 0., 0., 1.};
