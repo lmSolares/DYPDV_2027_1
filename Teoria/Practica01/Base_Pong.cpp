@@ -2,12 +2,18 @@
 #include <GL/glut.h> //the glut file for windows operations
 // it also includes gl.h and glu.h for the openGL library calls
 #include <math.h>
+#include <string>
 
 #define PI 3.1415926535898
 
 double xpos, ypos, ydir, xdir; // x and y position for house to be drawn
 double rot, rdir;              // rotation
 double ball_speed;
+
+/* score */
+int score_p1 = 0;
+int score_p2 = 0;
+bool is_paused = false;
 
 /* paddle players */
 const double paddle_width = 3;
@@ -72,11 +78,20 @@ void paddles_movement() {
   }
 }
 
-GLfloat RadiusOfBall = 15.;
+GLfloat RadiusOfBall = 8.;
 // Draw the ball, centered at the origin
 void draw_ball() {
   glColor3f(0.6, 0.3, 0.);
   MyCircle2f(0., 0., RadiusOfBall);
+}
+
+void resume_game(int value) { is_paused = false; }
+
+void draw_text(std::string text, float x, float y) {
+  glRasterPos2f(x, y);
+  for (char c : text) {
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+  }
 }
 
 void Display(void) {
@@ -88,10 +103,60 @@ void Display(void) {
   paddles_movement();
   draw_paddles(); /* dibujamos las paletas */
 
+  glColor3f(1.0, 1.0, 1.0);
+  draw_text(std::to_string(score_p1), 40, 110);
+  draw_text(std::to_string(score_p2), 120, 110);
+
+  /* movimiento de la pelota */
+  if (!is_paused) {
+    xpos += xdir * ball_speed;
+    ypos += ydir * ball_speed;
+  }
+
+  // rebote en el techo y suelo
+  if (ypos >= 120 - RadiusOfBall) {
+    ydir = -1; // cambiamos la direccion hacia abajo
+  } else if (ypos <= RadiusOfBall) {
+    ydir = 1; // cambiamos la dirección hacia arriba
+  }
+
+  /* rebote con la paleta izqueirda */
+  if (xdir == -1 && xpos - RadiusOfBall <= pl_pos_x + paddle_width &&
+      xpos + RadiusOfBall >= pl_pos_x - paddle_width &&
+      ypos - RadiusOfBall <= pl_pos_y + paddle_height &&
+      ypos + RadiusOfBall >= pl_pos_y - paddle_height) {
+    xdir = 1;
+  }
+
+  /* rebote con la paleta derecha */
+  if (xdir == 1 && xpos + RadiusOfBall >= pr_pos_x - paddle_width &&
+      xpos - RadiusOfBall <= pr_pos_x + paddle_width &&
+      ypos - RadiusOfBall <= pr_pos_y + paddle_height &&
+      ypos + RadiusOfBall >= pr_pos_y - paddle_height) {
+    xdir = -1;
+  }
+
+  // sistema para los puntos
+  if (xpos < 0) {
+    score_p2++;
+    // Si sale por la izquieorda, es punto para el jugador derecho
+    xpos = 80;
+    ypos = 60; // se regresa la pelota al estado inicial
+    xdir = 1;
+    is_paused = true;
+    glutTimerFunc(1000, resume_game, 0); // hay una pausa de 1 segundo
+  } else if (xpos > 160) {
+    score_p1++;
+    // si sale por la derecha, es punto para el jugador izquierdo
+    xpos = 80;
+    ypos = 60; // se regresa la pelota
+    xdir = -1;
+    is_paused = true;
+    glutTimerFunc(1000, resume_game, 0);
+  }
+
   glLoadIdentity();
   glTranslatef(xpos, ypos, 0.0f);
-  draw_ball();
-
   draw_ball();
 
   glutSwapBuffers(); /* intercambiar buffers */
@@ -116,11 +181,11 @@ void init(void) {
   glClearColor(0.0, 0.8, 0.0, 1.0);
   // initial position set to 0,0
   xpos = 80;
-  ypos = RadiusOfBall;
+  ypos = 60;
   xdir = 1;
   ydir = 1;
   rot = 0;
-  ball_speed = 1.5;
+  ball_speed = 0.8;
 }
 
 /* Detección de teclas */
