@@ -6,7 +6,6 @@
 #define PI 3.1415926535898
 
 double xpos, ypos, ydir, xdir; // x and y position for house to be drawn
-double sx, sy, squash;         // xy scale factors
 double rot, rdir;              // rotation
 double ball_speed;
 
@@ -89,59 +88,9 @@ void Display(void) {
   paddles_movement();
   draw_paddles(); /* dibujamos las paletas */
 
-  if (ypos == RadiusOfBall && ydir == -1) {
-    sy = sy * squash;
-
-    if (sy < 0.8)
-      // reached maximum suqash, now unsquash back up
-      squash = 1.1;
-    else if (sy > 1.) {
-      // reset squash parameters and bounce ball back upwards
-      sy = 1.;
-      squash = 0.9;
-      ydir = 1;
-    }
-    sx = 1. / sy;
-
-    // 120 is max Y value in our world
-
-  } else {
-    // set Y position to increment 1.5 times the direction of the bounce
-    ypos += ydir * ball_speed;
-
-    // If ball touches the top, change direction of ball downwards
-    if (ypos == 120 - RadiusOfBall) {
-      ydir = -1;
-    }
-    // If ball touches the bottom, change direction of ball upwards
-    else if (ypos < RadiusOfBall)
-      ydir = 1;
-  }
-
-  // reset transformation state
   glLoadIdentity();
-
-  // apply translation
-  glTranslatef(xpos, ypos, 0.);
-
-  // Translate ball back to center
-  glTranslatef(0., -RadiusOfBall, 0.);
-  // Scale the ball about its bottom
-  glScalef(sx, sy, 1.);
-  // Translate ball up so bottom is at the origin
-  glTranslatef(0., RadiusOfBall, 0.);
-
-  T[12] = xpos;
-  T[13] = ypos;
-  glLoadMatrixf(T); // Aplica la traslación de la pelota
-
-  T1[13] = -RadiusOfBall;
-  glMultMatrixf(T1);
-  S[0] = sx;
-  S[5] = sy;
-  glMultMatrixf(S);
-  T1[13] = RadiusOfBall;
-  glMultMatrixf(T1);
+  glTranslatef(xpos, ypos, 0.0f);
+  draw_ball();
 
   draw_ball();
 
@@ -170,9 +119,6 @@ void init(void) {
   ypos = RadiusOfBall;
   xdir = 1;
   ydir = 1;
-  sx = 1.;
-  sy = 1.;
-  squash = 0.9;
   rot = 0;
   ball_speed = 1.5;
 }
