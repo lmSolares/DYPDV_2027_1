@@ -194,6 +194,8 @@ int main(int argc, char *argv[]) {
   init();
   glutDisplayFunc(Display);
   glutReshapeFunc(reshape);
+  glutKeyboardFunc(keyboard);
+  glutSpecialFunc(specialKeys);
   glutMainLoop();
 
   return 1;
