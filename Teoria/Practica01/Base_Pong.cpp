@@ -1,3 +1,4 @@
+#include <GL/gl.h>
 #include <GL/glut.h> //the glut file for windows operations
 // it also includes gl.h and glu.h for the openGL library calls
 #include <math.h>
@@ -15,11 +16,11 @@ const double paddle_height = 20;
 
 /* player left */
 const double pl_pos_x = 10;
-double pl_pos_y;
+double pl_pos_y = 60;
 
 /* player right */
 const double pr_pos_x = 150;
-double pr_pos_y;
+double pr_pos_y = 60;
 
 GLfloat T1[16] = {1., 0., 0., 0., 0., 1., 0., 0.,
                   0., 0., 1., 0., 0., 0., 0., 1.};
@@ -41,6 +42,14 @@ void MyCircle2f(GLfloat centerx, GLfloat centery, GLfloat radius) {
   glEnd();
 }
 
+void draw_paddles() {
+  glRectf(pl_pos_x - paddle_width, pl_pos_y - paddle_height,
+          pl_pos_x + paddle_width, pl_pos_y + paddle_height);
+
+  glRectf(pr_pos_x - paddle_width, pr_pos_y - paddle_height,
+          pr_pos_x + paddle_width, pr_pos_y + paddle_height);
+}
+
 GLfloat RadiusOfBall = 15.;
 // Draw the ball, centered at the origin
 void draw_ball() {
@@ -49,15 +58,13 @@ void draw_ball() {
 }
 
 void Display(void) {
-  // swap the buffers
-  glutSwapBuffers();
 
-  // clear all pixels with the specified clear color
-  glClear(GL_COLOR_BUFFER_BIT);
-  // 160 is max X value in our world
+  glClear(GL_COLOR_BUFFER_BIT); /* limpiamos la pantalla */
 
-  // Shape has hit the ground! Stop moving and start squashing down and then
-  // back up
+  glLoadIdentity();
+
+  draw_paddles(); /* dibujamos las paletas */
+
   if (ypos == RadiusOfBall && ydir == -1) {
     sy = sy * squash;
 
@@ -87,41 +94,34 @@ void Display(void) {
       ydir = 1;
   }
 
-  /*  //reset transformation state
-    glLoadIdentity();
+  // reset transformation state
+  glLoadIdentity();
 
-    // apply translation
-    glTranslatef(xpos,ypos, 0.);
+  // apply translation
+  glTranslatef(xpos, ypos, 0.);
 
-    // Translate ball back to center
-    glTranslatef(0.,-RadiusOfBall, 0.);
-    // Scale the ball about its bottom
-    glScalef(sx,sy, 1.);
-    // Translate ball up so bottom is at the origin
-    glTranslatef(0.,RadiusOfBall, 0.);
-    // draw the ball
-    draw_ball();
-  */
+  // Translate ball back to center
+  glTranslatef(0., -RadiusOfBall, 0.);
+  // Scale the ball about its bottom
+  glScalef(sx, sy, 1.);
+  // Translate ball up so bottom is at the origin
+  glTranslatef(0., RadiusOfBall, 0.);
 
-  // Translate the bouncing ball to its new position
   T[12] = xpos;
   T[13] = ypos;
-  glLoadMatrixf(T);
+  glLoadMatrixf(T); // Aplica la traslación de la pelota
 
   T1[13] = -RadiusOfBall;
-  // Translate ball back to center
   glMultMatrixf(T1);
   S[0] = sx;
   S[5] = sy;
-  // Scale the ball about its bottom
   glMultMatrixf(S);
-
   T1[13] = RadiusOfBall;
-  // Translate ball up so bottom is at the origin
-
   glMultMatrixf(T1);
 
   draw_ball();
+
+  glutSwapBuffers(); /* intercambiar buffers */
   glutPostRedisplay();
 }
 
