@@ -13,6 +13,7 @@ double ball_speed;
 /* paddle players */
 const double paddle_width = 3;
 const double paddle_height = 20;
+const double paddle_speed = 5.0;
 
 /* player left */
 const double pl_pos_x = 10;
@@ -151,6 +152,37 @@ void init(void) {
   squash = 0.9;
   rot = 0;
   ball_speed = 1.5;
+}
+
+/* Detección de teclas */
+// Controles del jugador izquierdo (detecta w y s)
+void keyboard(unsigned char key, int x, int y) {
+  switch (key) {
+  case 'w':
+  case 'W':
+    if (pl_pos_y + paddle_height < 120)
+      pl_pos_y += paddle_speed;
+    break;
+  case 's':
+  case 'S':
+    if (pl_pos_y - paddle_height > 0)
+      pl_pos_y -= paddle_speed;
+    break;
+  }
+}
+
+// Controles del jugador derecho (flechas)
+void specialKeys(int key, int x, int y) {
+  switch (key) {
+  case GLUT_KEY_UP:
+    if (pr_pos_y + paddle_height < 120)
+      pr_pos_y += paddle_speed;
+    break;
+  case GLUT_KEY_DOWN:
+    if (pr_pos_y - paddle_height > 0)
+      pr_pos_y -= paddle_speed;
+    break;
+  }
 }
 
 int main(int argc, char *argv[]) {
