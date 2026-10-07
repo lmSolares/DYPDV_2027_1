@@ -14,7 +14,7 @@ public class ControlJugador : MonoBehaviour
 
     public float tiempoCoyote = 0.1f;
     public float tiempoBufferSalto = 0.1f;
-    
+
     public float coyoteTimer = 0f;
     public float bufferTimer = 0f;
 
@@ -52,19 +52,20 @@ public class ControlJugador : MonoBehaviour
             float h = Input.GetAxis("Horizontal");
             velocidadActual += h * aceleracion * delta;
             velocidadActual = Mathf.Clamp(velocidadActual, -velocidadMax, velocidadMax);
+
             transform.position += new Vector3(velocidadActual * delta, 0, 0);
 
             estaCaminando = Mathf.Abs(velocidadActual) > 0.1f;
             estaSaltando = velocidadVertical > 0.1f;
-        estaCayendo = velocidadVertical < -0.1f;
+            estaCayendo = velocidadVertical < -0.1f;
 
-        if (Input.GetAxis("Jump") > 0 && jugador.enSuelo)
+            if (Input.GetAxis("Jump") > 0 && jugador.enSuelo)
             {
                 velocidadVertical = 10f;
                 jugador.enSuelo = false;
                 tiempoSaltoActual = 0f;
                 audioSrc.PlayOneShot(sonidoSalto);
-        }
+            }
 
             if (!jugador.enSuelo && Input.GetAxis("Jump") > 0)
             {
@@ -78,7 +79,8 @@ public class ControlJugador : MonoBehaviour
             if(jugador.enSuelo)
             {
                 coyoteTimer = tiempoCoyote;
-            } else 
+            }
+            else
             {
                 coyoteTimer -= delta;
             }
@@ -90,7 +92,8 @@ public class ControlJugador : MonoBehaviour
                 bufferTimer = 0;
                 coyoteTimer = 0;
                 audioSrc.PlayOneShot(sonidoSalto);
-        }
+            }
+
             if(h == 0)
             {
                 if(velocidadActual > 0){
@@ -99,6 +102,7 @@ public class ControlJugador : MonoBehaviour
                 {
                   velocidadActual += desaceleracion * delta;
                 }
+
                 if(Mathf.Abs(velocidadActual) < 0.1f)
                 {
                     velocidadActual = 0;
@@ -116,15 +120,14 @@ public class ControlJugador : MonoBehaviour
             }
             else
             {
-                velocidadVertical += gravedad * delta;
-            }
-
-            if(velocidadVertical < 0)
-            {
-                velocidadVertical += gravedadCaida * delta;
-            } else 
-            {
-                velocidadVertical += gravedad *delta;
+                if(velocidadVertical < 0)
+                {
+                    velocidadVertical += gravedadCaida * delta;
+                }
+                else
+                {
+                    velocidadVertical += gravedad * delta;
+                }
             }
 
             if (h < 0)
@@ -142,18 +145,19 @@ public class ControlJugador : MonoBehaviour
             anim.SetBool("Saltando", estaSaltando);
             anim.SetBool("Cayendo", estaCayendo);
 
-        if (estaCaminando && jugador.enSuelo)
-        {
-            timerPasos -= delta;
-            if (timerPasos <= 0f)
+            if (estaCaminando && jugador.enSuelo)
             {
-                audioSrc.PlayOneShot(sonidoPaso);
-                timerPasos = tiempoEntrePasos;
+                timerPasos -= delta;
+                if (timerPasos <= 0f)
+                {
+                    audioSrc.PlayOneShot(sonidoPaso);
+                    timerPasos = tiempoEntrePasos;
+                }
+            }
+            else
+            {
+                timerPasos = 0f;
             }
         }
-        else
-        {
-            timerPasos = 0f;
-        }
-    }
+
 }
