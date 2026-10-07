@@ -1,8 +1,13 @@
 using UnityEngine;
 
-public class Jugador : MonoBehaviour
+public class Jugador : Personaje
 {
     public bool enSuelo = false;
+
+    protected override void Awake()
+    {
+        base.Awake();
+    }
 
     void OnCollisionEnter2D(Collision2D col)
     {
