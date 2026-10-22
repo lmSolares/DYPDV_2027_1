@@ -1030,13 +1030,11 @@ MonoBehaviour:
   aceleracion: 10
   velocidadVertical: 0
   gravedad: -20
-  fuerzaSalto: 0
+  fuerzaSalto: 10
   desaceleracion: 8
   gravedadCaida: -30
   tiempoCoyote: 0.1
   tiempoBufferSalto: 0.1
-  coyoteTimer: 0
-  bufferTimer: 0
   tiempoMaxSalto: 0.2
   estaCaminando: 0
   estaSaltando: 0

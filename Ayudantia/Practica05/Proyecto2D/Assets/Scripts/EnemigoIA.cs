@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemigoIA:Personaje
+public class EnemigoIA : Personaje
 {
     public float direction = -1f;
     private Animator anim;
@@ -31,12 +31,10 @@ public class EnemigoIA:Personaje
             {
                 RecibirDaño(1);
             }
-
             else
             {
                 col.gameObject.GetComponent<Jugador>().RecibirDaño(1);
             }
         }
     }
-
 }

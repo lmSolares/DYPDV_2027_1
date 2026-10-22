@@ -1,11 +1,9 @@
 using UnityEngine;
 
-public class Personaje: MonoBehaviour
+public class Personaje : MonoBehaviour
 {
-
     public float velocidad = 2f;
     public int vida = 1;
-
     protected Rigidbody2D rb;
     protected SpriteRenderer sr;
 
@@ -25,5 +23,4 @@ public class Personaje: MonoBehaviour
     {
         Destroy(gameObject);
     }
-
 }
