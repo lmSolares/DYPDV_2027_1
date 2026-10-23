@@ -1,0 +1,158 @@
+using UnityEngine;
+
+public class ControlJugador : MonoBehaviour
+{
+    public float velocidadActual = 0f;
+    public float velocidadMax = 5f;
+    public float aceleracion = 10f;
+    public float velocidadVertical = 0f;
+    public float gravedad = -20f;
+    public float fuerzaSalto = 10f;
+    public float desaceleracion = 8f;
+    public float gravedadCaida = -30f;
+    public float tiempoCoyote = 0.1f;
+    public float tiempoBufferSalto = 0.1f;
+    private float coyoteTimer = 0f;
+    private float bufferTimer = 0f;
+    public float tiempoMaxSalto = 0.2f;
+    private float tiempoSaltoActual = 0f;
+    private float tiempoAnterior;
+
+    public bool estaCaminando;
+    public bool estaSaltando;
+    public bool estaCayendo;
+
+    private Jugador jugador;
+    private Animator anim;
+    private SpriteRenderer spr;
+
+    public AudioClip sonidoSalto;
+    public AudioClip sonidoPaso;
+    private AudioSource audioSrc;
+
+    public float tiempoEntrePasos = 0.3f;
+    private float timerPasos = 0f;
+
+    public GameObject prefabProyectil;
+    public Transform puntoDisparo;
+    public AudioClip sonidoDisparo;
+
+    void Awake()
+    {
+        jugador = GetComponent<Jugador>();
+        anim = GetComponent<Animator>();
+        spr = GetComponent<SpriteRenderer>();
+        audioSrc = GetComponent<AudioSource>();
+    }
+
+    void Update()
+    {
+        float delta = Time.time - tiempoAnterior;
+        tiempoAnterior = Time.time;
+        float h = Input.GetAxis("Horizontal");
+
+        if (h != 0)
+        {
+            velocidadActual += h * aceleracion * delta;
+            velocidadActual = Mathf.Clamp(velocidadActual, -velocidadMax, velocidadMax);
+            spr.flipX = h < 0;
+        }
+        else
+        {
+            if (velocidadActual > 0)
+                velocidadActual -= desaceleracion * delta;
+            else if (velocidadActual < 0)
+                velocidadActual += desaceleracion * delta;
+
+            if (Mathf.Abs(velocidadActual) < 0.1f)
+                velocidadActual = 0;
+        }
+
+        if (jugador.enSuelo)
+            coyoteTimer = tiempoCoyote;
+        else
+            coyoteTimer -= delta;
+
+        if (Input.GetAxis("Jump") > 0)
+            bufferTimer = tiempoBufferSalto;
+        else
+            bufferTimer -= delta;
+
+        if (bufferTimer > 0 && coyoteTimer > 0)
+        {
+            velocidadVertical = fuerzaSalto;
+            jugador.enSuelo = false;
+            bufferTimer = 0;
+            coyoteTimer = 0;
+            tiempoSaltoActual = 0f;
+            audioSrc.PlayOneShot(sonidoSalto);
+        }
+
+        if (!jugador.enSuelo && Input.GetAxis("Jump") > 0)
+        {
+            if (tiempoSaltoActual < tiempoMaxSalto)
+            {
+                velocidadVertical += 20f * delta;
+                tiempoSaltoActual += delta;
+            }
+        }
+
+        if (Input.GetAxis("Jump") == 0)
+        {
+            tiempoSaltoActual = tiempoMaxSalto;
+        }
+
+        if (jugador.enSuelo)
+        {
+            velocidadVertical = 0;
+        }
+        else
+        {
+            if (velocidadVertical < 0)
+                velocidadVertical += gravedadCaida * delta;
+            else
+                velocidadVertical += gravedad * delta;
+        }
+
+        transform.position += new Vector3(velocidadActual * delta, velocidadVertical * delta, 0);
+
+        estaCaminando = Mathf.Abs(velocidadActual) > 0.1f;
+        estaSaltando = velocidadVertical > 0.1f;
+        estaCayendo = velocidadVertical < -0.1f;
+
+        anim.SetBool("Caminando", estaCaminando);
+        anim.SetBool("Saltando", estaSaltando);
+        anim.SetBool("Cayendo", estaCayendo);
+
+        if (estaCaminando && jugador.enSuelo)
+        {
+            timerPasos -= delta;
+            if (timerPasos <= 0f)
+            {
+                audioSrc.PlayOneShot(sonidoPaso);
+                timerPasos = tiempoEntrePasos;
+            }
+        }
+        else
+        {
+            timerPasos = 0f;
+        }
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            Disparar();
+        }
+    }
+
+    void Disparar()
+    {
+        GameObject p = Instantiate(prefabProyectil, puntoDisparo.position, Quaternion.identity);
+        Vector2 dir = spr.flipX ? Vector2.left : Vector2.right;
+        float velocidadJugador = velocidadActual;
+        p.GetComponent<Proyectil>().Inicializar(dir, velocidadJugador);
+
+        anim.SetTrigger("Disparando");
+        if (sonidoDisparo != null) audioSrc.PlayOneShot(sonidoDisparo);
+    }
+
+}
