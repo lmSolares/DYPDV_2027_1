@@ -28,7 +28,7 @@ public class Proyectil : MonoBehaviour
             col.GetComponent<EnemigoIA>().RecibirDaño(daño);
             Destroy(gameObject);
         }
-        if (col.CompareTag("Pared") || col.CompareTag("Obstaculo"))
+        if (col.CompareTag("Obstaculo"))
         {
             Destroy(gameObject);
         }
